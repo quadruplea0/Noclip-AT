@@ -1,0 +1,47 @@
+{
+    "geode": "5.7.0",
+    "gd": {
+        "win": "2.2081",
+        "android": "2.2081",
+        "mac": "2.2081",
+        "ios": "2.2081"
+    },
+    "id": "itzrealmerk.noclip-at",
+    "name": "Noclip AT",
+    "version": "v1.0.0",
+    "developer": "itzrealmerk",
+    "description": "Activates noclip automatically after a chosen percent. Default menu keybind: F8.",
+    "dependencies": {
+        "geode.node-ids": ">=v1.23.3"
+    },
+    "settings": {
+        "enabled": {
+            "name": "Enabled",
+            "description": "Turns Noclip AT on or off.",
+            "type": "bool",
+            "default": false
+        },
+        "activation-percent": {
+            "name": "Activation Percent",
+            "description": "The percent where noclip starts.",
+            "type": "int",
+            "default": 10,
+            "min": 0,
+            "max": 100
+        },
+        "show-message": {
+            "name": "Show Activation Message",
+            "description": "Shows a notification when Noclip AT activates.",
+            "type": "bool",
+            "default": true
+        },
+        "open-menu": {
+            "type": "keybind",
+            "name": "Open Noclip AT Menu",
+            "description": "Opens or closes the Noclip AT menu.",
+            "default": "F8",
+            "category": "universal",
+            "priority": 10
+        }
+    }
+}

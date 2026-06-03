@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="90" fill="#121212"/>
+  <rect x="34" y="34" width="444" height="444" rx="70" fill="none" stroke="#ff4fa3" stroke-width="18"/>
+  <text x="256" y="235" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="110" fill="#ffffff">NAT</text>
+  <text x="256" y="325" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="64" fill="#ff4fa3">%</text>
+</svg>
