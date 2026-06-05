@@ -18,6 +18,7 @@ static int clampPercent(int value) {
     return value;
 }
 
+
 static int getPercent() {
     return static_cast<int>(Mod::get()->getSettingValue<int64_t>("activation-percent"));
 }
@@ -38,14 +39,6 @@ static bool getShowMessage() {
     return Mod::get()->getSettingValue<bool>("show-message");
 }
 
-
-$on_game(Loaded) {
-    listenForKeybindSettingPresses("open-menu", [](Keybind const&, bool down, bool repeat, double) {
-        if (down && !repeat) {
-            toggleCurrentPanel();
-        }
-    });
-}
 
 class NoclipATPanel : public CCLayer {
 protected:
@@ -185,46 +178,62 @@ public:
 };
 
 
+static void refreshtextforenabled() {
+    if (g_currentPanel) {
+        g_currentPanel->refreshText();
+    }
+}
+
 static void toggleCurrentPanel() {
     if (g_currentPanel) {
         g_currentPanel->togglePanel();
     }
 }
 
-class $modify(NoclipATMenuLayer, MenuLayer) {
-    struct Fields {
-        NoclipATPanel* panel = nullptr;
-    };
+// Keep ALL keybind handling here globally so you don't duplicate listeners
+$on_game(Loaded) {
+    listenForKeybindSettingPresses("open-menu", [](Keybind const&, bool down, bool repeat, double) {
+        if (down && !repeat) {
+            toggleCurrentPanel();
+        }
+    });
 
+    listenForKeybindSettingPresses("enable-keybind", [](Keybind const&, bool down, bool repeat, double) {
+        if (down && !repeat) {
+            setEnabled(!getEnabled());
+            refreshtextforenabled();
+        }
+    });
+}
+
+class $modify(NoclipATMenuLayer, MenuLayer) {
     bool init() {
         if (!MenuLayer::init()) return false;
 
         auto win = CCDirector::sharedDirector()->getWinSize();
-
         auto panel = NoclipATPanel::create();
-
-        // Clear visible spot above the bottom buttons
         panel->setPosition({win.width - 180.f, 42.f});
-
         this->addChild(panel, 99999);
-        m_fields->panel = panel;
 
-        this->addEventListener(
-            KeybindSettingPressedEventV3(Mod::get(), "open-menu"),
-            [this](Keybind const&, bool down, bool repeat, double) {
-                if (down && !repeat && m_fields->panel) {
-                    m_fields->panel->togglePanel();
-                }
-            }
-        );
+        // FIX: Assign this panel instance to the global pointer
+        g_currentPanel = panel; 
 
         return true;
+    }
+
+    void onExit() {
+        MenuLayer::onExit();
+        // Clear global pointer when leaving MenuLayer
+        if (g_currentPanel == this->getChildByTag(99999)) { // logic safety step
+             g_currentPanel = nullptr;
+        }
     }
 };
 
 class $modify(NoclipATPlayLayer, PlayLayer) {
     struct Fields {
         bool messageShown = false;
+        NoclipATPanel* panel = nullptr;
     };
 
     bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
@@ -233,21 +242,21 @@ class $modify(NoclipATPlayLayer, PlayLayer) {
         m_fields->messageShown = false;
 
         auto win = CCDirector::sharedDirector()->getWinSize();
-
         auto panel = NoclipATPanel::create();
         panel->setPosition({win.width - 180.f, 42.f});
         this->addChild(panel, 99999);
+        m_fields->panel = panel;
 
-        this->addEventListener(
-            KeybindSettingPressedEventV3(Mod::get(), "open-menu"),
-            [panel](Keybind const&, bool down, bool repeat, double) {
-                if (down && !repeat && panel) {
-                    panel->togglePanel();
-                }
-            }
-        );
+        // FIX: Assign this panel instance to the global pointer
+        g_currentPanel = panel;
 
         return true;
+    }
+
+    void onExit() {
+        PlayLayer::onExit();
+        // Clear global pointer when exiting the level
+        g_currentPanel = nullptr;
     }
 
     void resetLevel() {
